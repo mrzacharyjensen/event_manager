@@ -17,7 +17,6 @@ def legislators_by_zipcode(zip)
       roles: ['legislatorUpperBody', 'legislatorLowerBody']
     )
     legislators = legislators.officials
-    legislator_names = legislators.map(&:name).join(", ")
   rescue
     'You can find your representatives by visiting www.commoncause.org/take-action/find-elected-officials'
   end
@@ -35,6 +34,7 @@ template_letter = File.read('form_letter.erb')
 erb_template = ERB.new template_letter
 
 contents.each { |row|
+  id = row[0]
   name = row[:first_name]
 
   zipcode = clean_zipcode(row[:zipcode])
@@ -42,5 +42,14 @@ contents.each { |row|
   legislators = legislators_by_zipcode(zipcode)
 
   form_letter = erb_template.result(binding)
-  puts form_letter
+  
+  Dir.mkdir('output') unless Dir.exist?('output')
+
+  filename = "output/thanks_#{id}.html"
+
+  File.open(filename, "w") { |file|
+    file.puts form_letter
+  }
 }
+
+puts 'Event Manager Completed!'
